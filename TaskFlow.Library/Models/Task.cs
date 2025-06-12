@@ -2,7 +2,7 @@ using System; // For DateTime
 
 namespace TaskFlow.Library.Models
 {
-    public enum PriorityLevel // You can put enums in their own file or here
+    public enum PriorityLevel 
     {
         Low,
         Medium,
