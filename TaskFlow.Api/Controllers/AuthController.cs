@@ -1,20 +1,39 @@
 using Microsoft.AspNetCore.Mvc;
+using TaskFlow.Library.Dtos;
+using TaskFlow.Library.Services;
+using System.Threading.Tasks;
 
 [ApiController]
-[Route("api/auth")] 
+[Route("api/auth")]
 public class AuthController : ControllerBase
 {
-    public class AuthDetails { public string Username { get; set; } = ""; public string Password { get; set; } = ""; }
+    private readonly IAuthService _authService;
 
-    [HttpPost("login")] 
-    public IActionResult LoginPlaceholder([FromBody] AuthDetails creds)
+    // Inject the service
+    public AuthController(IAuthService authService)
     {
-        return Ok(new { Message = "Login will go here!" });
+        _authService = authService;
     }
 
-    [HttpPost("register")] 
-    public IActionResult RegisterPlaceholder([FromBody] AuthDetails creds)
+    [HttpPost("register")]
+    public async Task<IActionResult> Register(UserRegisterDto request)
     {
-        return Ok(new { Message = "Registration will go here!" });
+        var user = await _authService.Register(request);
+        if (user == null)
+        {
+            return BadRequest("Username already exists.");
+        }
+        return Ok(new { Message = "User registered successfully." });
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(UserLoginDto request)
+    {
+        var token = await _authService.Login(request);
+        if (token == null)
+        {
+            return Unauthorized("Invalid credentials.");
+        }
+        return Ok(new { Token = token });
     }
 }

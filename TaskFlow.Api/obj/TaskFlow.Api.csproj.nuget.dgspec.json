@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\TaskFlow\\TaskFlow.Api\\TaskFlow.Api.csproj": {}
+    "D:\\TaskFlow\\TaskFlow.API\\TaskFlow.Api.csproj": {}
   },
   "projects": {
-    "D:\\TaskFlow\\TaskFlow.Api\\TaskFlow.Api.csproj": {
+    "D:\\TaskFlow\\TaskFlow.API\\TaskFlow.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\TaskFlow\\TaskFlow.Api\\TaskFlow.Api.csproj",
+        "projectUniqueName": "D:\\TaskFlow\\TaskFlow.API\\TaskFlow.Api.csproj",
         "projectName": "TaskFlow.Api",
-        "projectPath": "D:\\TaskFlow\\TaskFlow.Api\\TaskFlow.Api.csproj",
+        "projectPath": "D:\\TaskFlow\\TaskFlow.API\\TaskFlow.Api.csproj",
         "packagesPath": "C:\\Users\\Yogi Suhagiya\\.nuget\\packages\\",
-        "outputPath": "D:\\TaskFlow\\TaskFlow.Api\\obj\\",
+        "outputPath": "D:\\TaskFlow\\TaskFlow.API\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Yogi Suhagiya\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -47,9 +47,25 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.6, )"
+            },
+            "Moq": {
+              "target": "Package",
+              "version": "[4.20.72, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.6.2, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.12.0, )"
+            },
+            "xunit": {
+              "target": "Package",
+              "version": "[2.9.3, )"
             }
           },
           "imports": [
@@ -113,6 +129,34 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.Extensions.Configuration.Abstractions": {
+              "target": "Package",
+              "version": "[9.0.6, )"
+            },
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[17.14.1, )"
+            },
+            "Moq": {
+              "target": "Package",
+              "version": "[4.20.72, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.12.0, )"
+            },
+            "xunit": {
+              "target": "Package",
+              "version": "[2.9.3, )"
+            },
+            "xunit.runner.visualstudio": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.1.1, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
