@@ -1,55 +1,112 @@
-<<<<<<< HEAD
-=======
+// // File: TaskFlow.Api/Controllers/AuthController.cs
+// using Microsoft.AspNetCore.Identity;
+// using Microsoft.AspNetCore.Mvc;
+// using Microsoft.IdentityModel.Tokens;
+// using System.IdentityModel.Tokens.Jwt;
+// using System.Security.Claims;
+// using System.Text;
+// using TaskFlow.Core.Models;
 
->>>>>>> 504eb3ab2959bb7c5cc20c8be1d7759f45968222
+// public record UserRegisterDto(string Username, string Email, string Password);
+// public record UserLoginDto(string Username, string Password);
+// public record LoginResponse(string Token);
+
+// [Route("api/[controller]")]
+// [ApiController]
+// public class AuthController : ControllerBase
+// {
+//     private readonly UserManager<AppUser> _userManager;
+//     private readonly IConfiguration _configuration;
+//     public AuthController(UserManager<AppUser> userManager, IConfiguration configuration) {
+//         _userManager = userManager; _configuration = configuration;
+//     }
+
+//     [HttpPost("register")]
+//     public async Task<IActionResult> Register(UserRegisterDto request) {
+//         var user = new AppUser { UserName = request.Username, Email = request.Email };
+//         var result = await _userManager.CreateAsync(user, request.Password);
+//         if (!result.Succeeded) return BadRequest(result.Errors);
+//         return Ok("User registered successfully!");
+//     }
+
+//     [HttpPost("login")]
+//     public async Task<ActionResult<LoginResponse>> Login(UserLoginDto request) {
+//         var user = await _userManager.FindByNameAsync(request.Username);
+//         if (user != null && await _userManager.CheckPasswordAsync(user, request.Password)) {
+//             var claims = new[] { new Claim(ClaimTypes.NameIdentifier, user.Id), new Claim(ClaimTypes.Name, user.UserName!) };
+//             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["AppSettings:Token"]!));
+//             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+//             var token = new JwtSecurityToken(claims: claims, expires: DateTime.Now.AddDays(1), signingCredentials: creds);
+//             return Ok(new LoginResponse(new JwtSecurityTokenHandler().WriteToken(token)));
+//         }
+//         return Unauthorized("Invalid credentials.");
+//     }
+// }
+
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using TaskFlow.Library.Dtos;
-using TaskFlow.Library.Services;
-using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using TaskFlow.Core.Models;
 
+public record UserRegisterDto(string Username, string Email, string Password);
+public record UserLoginDto(string Username, string Password);
+public record LoginResponse(string Token);
+
+[Route("api/[controller]")]
 [ApiController]
-[Route("api/auth")]
 public class AuthController : ControllerBase
 {
-<<<<<<< HEAD
-    private readonly IAuthService _authService;
+    private readonly UserManager<AppUser> _userManager;
+    private readonly IConfiguration _configuration;
 
-    // Inject the service
-    public AuthController(IAuthService authService)
-=======
-    public class AuthDetails { public string Username { get; set; } = ""; public string Password { get; set; } = ""; }
-
-    [HttpPost("login")] n
-    public IActionResult LoginPlaceholder([FromBody] AuthDetails creds)
->>>>>>> 504eb3ab2959bb7c5cc20c8be1d7759f45968222
+    public AuthController(UserManager<AppUser> userManager, IConfiguration configuration)
     {
-        _authService = authService;
+        _userManager = userManager;
+        _configuration = configuration;
     }
 
-<<<<<<< HEAD
     [HttpPost("register")]
     public async Task<IActionResult> Register(UserRegisterDto request)
-=======
-    [HttpPost("register")] 
-    public IActionResult RegisterPlaceholder([FromBody] AuthDetails creds)
->>>>>>> 504eb3ab2959bb7c5cc20c8be1d7759f45968222
     {
-        var user = await _authService.Register(request);
-        if (user == null)
-        {
-            return BadRequest("Username already exists.");
-        }
-        return Ok(new { Message = "User registered successfully." });
+        var user = new AppUser { UserName = request.Username, Email = request.Email };
+        var result = await _userManager.CreateAsync(user, request.Password);
+        if (!result.Succeeded) return BadRequest(result.Errors);
+        return Ok("User registered successfully!");
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(UserLoginDto request)
+    public async Task<ActionResult<LoginResponse>> Login(UserLoginDto request)
     {
-        var token = await _authService.Login(request);
-        if (token == null)
+        var user = await _userManager.FindByNameAsync(request.Username);
+        if (user != null && await _userManager.CheckPasswordAsync(user, request.Password))
         {
-            return Unauthorized("Invalid credentials.");
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.UserName!)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["AppSettings:Token"]!));
+            
+            // THIS IS THE FIX: Using a different, more flexible algorithm
+       
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddDays(1),
+                SigningCredentials = creds
+            };
+            
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            
+            return Ok(new LoginResponse(tokenHandler.WriteToken(token)));
         }
-        return Ok(new { Token = token });
+        return Unauthorized("Invalid credentials.");
     }
 }
