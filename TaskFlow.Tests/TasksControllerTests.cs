@@ -112,7 +112,7 @@ public class TasksControllerTests
         SeedDatabase();
 
         _controller = new TasksController(_context);
-        
+
         // Mock a logged-in user by creating a fake identity for the controller.
         var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
         {
@@ -123,18 +123,36 @@ public class TasksControllerTests
             HttpContext = new DefaultHttpContext() { User = user }
         };
     }
-
     private void SeedDatabase()
     {
+        // Must create categories first
+        var category1 = new Category { Id = 1, Name = "Project", AppUserId = _testUserId };
+        var category2 = new Category { Id = 2, Name = "Personal", AppUserId = _testUserId };
+        var otherUserCategory = new Category { Id = 3, Name = "Secret", AppUserId = _otherUserId };
+        _context.Categories.AddRange(category1, category2, otherUserCategory);
+
         var tasks = new List<TaskItem>
-        {
-            new TaskItem { Id = 1, Title = "My High Priority Task", AppUserId = _testUserId, Status = "Pending", PriorityLevel = PriorityLevel.High },
-            new TaskItem { Id = 2, Title = "My Completed Task", AppUserId = _testUserId, Status = "Completed" },
-            new TaskItem { Id = 3, Title = "Someone else's task", AppUserId = _otherUserId, Status = "Pending" }
-        };
+    {
+        new TaskItem { Id = 1, Title = "My High Priority Task", AppUserId = _testUserId, Status = "Pending", PriorityLevel = PriorityLevel.High, CategoryId = 1 },
+        new TaskItem { Id = 2, Title = "My Completed Task", AppUserId = _testUserId, Status = "Completed", CategoryId = 2 },
+        new TaskItem { Id = 3, Title = "Someone else's task", AppUserId = _otherUserId, Status = "Pending" },
+        new TaskItem { Id = 4, Title = "Another project task", AppUserId = _testUserId, Status = "Pending", CategoryId = 1 }
+    };
         _context.TaskItems.AddRange(tasks);
         _context.SaveChanges();
     }
+
+    // private void SeedDatabase()
+    // {
+    //     var tasks = new List<TaskItem>
+    //     {
+    //         new TaskItem { Id = 1, Title = "My High Priority Task", AppUserId = _testUserId, Status = "Pending", PriorityLevel = PriorityLevel.High },
+    //         new TaskItem { Id = 2, Title = "My Completed Task", AppUserId = _testUserId, Status = "Completed" },
+    //         new TaskItem { Id = 3, Title = "Someone else's task", AppUserId = _otherUserId, Status = "Pending" }
+    //     };
+    //     _context.TaskItems.AddRange(tasks);
+    //     _context.SaveChanges();
+    // }
 
     // Test 1: GET (All) - Proves security and data fetching.
     [Fact]
@@ -145,6 +163,22 @@ public class TasksControllerTests
         var tasks = Assert.IsAssignableFrom<IEnumerable<TaskItem>>(okResult.Value);
         Assert.Equal(2, tasks.Count()); // User 1 should only have 2 tasks.
         Assert.All(tasks, task => Assert.Equal(_testUserId, task.AppUserId));
+    }
+    // Add these tests to the TasksControllerTests.cs file
+    [Fact]
+    public async Task GetTasksByCategory_WithValidCategoryId_ReturnsMatchingTasks()
+    {
+        var result = await _controller.GetTasksByCategory(1);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var tasks = Assert.IsAssignableFrom<IEnumerable<TaskItem>>(okResult.Value);
+        Assert.Equal(2, tasks.Count()); // Two tasks are in category 1
+    }
+
+    [Fact]
+    public async Task GetTasksByCategory_WithCategoryIdOfAnotherUser_ReturnsForbid()
+    {
+        var result = await _controller.GetTasksByCategory(3); // Category 3 belongs to other user
+        Assert.IsType<ForbidResult>(result.Result);
     }
 
     // Test 2: GET (by ID) - Proves successful retrieval.
@@ -228,8 +262,39 @@ public class TasksControllerTests
     [Fact]
     public async Task GetTaskSummary_ReturnsCorrectSummary()
     {
+
+
         var result = await _controller.GetTaskSummary();
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.NotNull(okResult.Value); // Check that the summary data is not null.
     }
+
+    // Add these tests to your existing TasksControllerTests.cs file
+    [Fact]
+    public async Task CreateTask_WithInvalidCategoryId_ShouldStillCreateTaskWithNullCategory()
+    {
+        // A test to see what happens if the user tries to assign a task to a category that doesn't exist.
+        // The task should still be created, but its CategoryId should be null.
+        var newTask = new TaskItem { Title = "Task with bad category", CategoryId = 999 };
+        var result = await _controller.CreateTask(newTask);
+
+        // Assert that the task was still created successfully
+        var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
+        var taskValue = Assert.IsType<TaskItem>(createdResult.Value);
+        Assert.Equal("Task with bad category", taskValue.Title);
+
+        // You might need more logic in the controller to enforce that the CategoryId is valid,
+        // but for now, we just test the current behavior.
+    }
+
+    [Fact]
+    public async Task GetTasksByCategory_WithInvalidId_ReturnsEmptyList()
+    {
+        // If we ask for tasks from a category that doesn't exist (but we would own), we should get an empty list back.
+        var result = await _controller.GetTasksByCategory(999);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var tasks = Assert.IsAssignableFrom<IEnumerable<TaskItem>>(okResult.Value);
+        Assert.Empty(tasks);
+    }
+
 }

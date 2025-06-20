@@ -17,5 +17,8 @@ namespace TaskFlow.Core.Models
         public string Status { get; set; } = "Pending";
         public string AppUserId { get; set; } = string.Empty;
         public virtual AppUser? AppUser { get; set; }
+        // Add these two properties to the TaskItem class
+        public int? CategoryId { get; set; } // Nullable, as a task might not have a category
+        public virtual Category? Category { get; set; }
     }
 }
