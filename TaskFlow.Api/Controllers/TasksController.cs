@@ -90,7 +90,7 @@ namespace TaskFlow.Api.Controllers
 
         private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-// Add this simple method for testing
+        // Add this simple method for testing
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasks() =>
@@ -102,6 +102,25 @@ namespace TaskFlow.Api.Controllers
             var task = await _context.TaskItems.FirstOrDefaultAsync(t => t.Id == id && t.AppUserId == GetUserId());
             if (task == null) return NotFound();
             return Ok(task);
+        }
+
+        // Ancillary Goal #3: Filter tasks by category
+        [HttpGet("category/{categoryId}")]
+        public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasksByCategory(int categoryId)
+        {
+            var userId = GetUserId();
+            // First, ensure the user owns the category they are asking for
+            var userOwnsCategory = await _context.Categories.AnyAsync(c => c.Id == categoryId && c.AppUserId == userId);
+            if (!userOwnsCategory)
+            {
+                return Forbid(); // Or NotFound, Forbid is more accurate
+            }
+
+            var tasks = await _context.TaskItems
+                .Where(t => t.AppUserId == userId && t.CategoryId == categoryId)
+                .ToListAsync();
+
+            return Ok(tasks);
         }
 
         [HttpPost]
@@ -138,7 +157,7 @@ namespace TaskFlow.Api.Controllers
             entityToUpdate.DueDate = taskItem.DueDate;
             entityToUpdate.PriorityLevel = taskItem.PriorityLevel;
             entityToUpdate.Status = taskItem.Status;
-            
+
             // 4. Save the changes.
             await _context.SaveChangesAsync();
 
@@ -154,7 +173,7 @@ namespace TaskFlow.Api.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
-        
+
 
         [HttpGet("priority/{level}")]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasksByPriority(PriorityLevel level) =>

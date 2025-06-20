@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\TaskFlow\\TaskFlow.Api\\TaskFlow.Api.csproj": {}
+    "D:\\TaskFlow\\TaskFlow.APi\\TaskFlow.Api.csproj": {}
   },
   "projects": {
-    "D:\\TaskFlow\\TaskFlow.Api\\TaskFlow.Api.csproj": {
+    "D:\\TaskFlow\\TaskFlow.APi\\TaskFlow.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\TaskFlow\\TaskFlow.Api\\TaskFlow.Api.csproj",
+        "projectUniqueName": "D:\\TaskFlow\\TaskFlow.APi\\TaskFlow.Api.csproj",
         "projectName": "TaskFlow.Api",
-        "projectPath": "D:\\TaskFlow\\TaskFlow.Api\\TaskFlow.Api.csproj",
+        "projectPath": "D:\\TaskFlow\\TaskFlow.APi\\TaskFlow.Api.csproj",
         "packagesPath": "C:\\Users\\Yogi Suhagiya\\.nuget\\packages\\",
-        "outputPath": "D:\\TaskFlow\\TaskFlow.Api\\obj\\",
+        "outputPath": "D:\\TaskFlow\\TaskFlow.APi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Yogi Suhagiya\\AppData\\Roaming\\NuGet\\NuGet.Config"
